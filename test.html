@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas" width="200" height="150"></canvas>
+</body>
+
+</html>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext("2d");
+    const grd = ctx.createLinearGradient(120, 0, 80, 150);
+    grd.addColorStop(0, '#281920');
+    grd.addColorStop(0.5, '#62141f');
+    grd.addColorStop(1, '#dc091c');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, 200, 150);
+
+    ctx.lineWidth=3
+    ctx.strokeStyle='#f63133'
+    ctx.moveTo(0, 50);
+    ctx.lineTo(60, 50);
+    ctx.stroke();
+    ctx.moveTo(70, 0);
+    ctx.lineTo(70, 45);
+    ctx.stroke();
+    ctx.moveTo(0, 100);
+    ctx.lineTo(90, 100);
+    ctx.stroke();
+    ctx.moveTo(70, 90);
+    ctx.lineTo(70, 150);
+    ctx.stroke();
+    ctx.moveTo(140, 50);
+    ctx.lineTo(140, 100);
+    ctx.stroke();
+    ctx.moveTo(200, 50);
+    ctx.lineTo(145, 50);
+    ctx.stroke();
+    ctx.moveTo(200, 100);
+    ctx.lineTo(160, 100);
+    ctx.stroke();
+    ctx.moveTo(0, 1);
+    ctx.lineTo(200, 1);
+    ctx.stroke();
+</script>
