@@ -14,7 +14,7 @@ class Business extends Area {
 
   init(){
     this.createNodes();
-    this.createBorder(20,20,true);
+    this.createBorder(0,0,true);
     this.createSign("业务区")
       .then((txt)=>{
         this.add(txt);
@@ -63,9 +63,20 @@ class Business extends Area {
     this.createAreaLinePath(mfire,exter,"down",40);
     this.createAreaLinePath(mfire,dataArea,"left",50);
     this.createAreaLinePath(mfire,core,"right",50);
-    this.createAreaLinePath(mfire,office,"up",50);
+    let line1=this.createAreaLinePath(mfire,office,"up",50);
+    line1.position.x=office.position.x+office.borderX/2
+    let line2=this.createAreaLinePath(mfire,internalServiceArea,"up",50);
+    line2.position.x=internalServiceArea.position.x+internalServiceArea.borderX/2
+    console.log(line1,line2)
+    line1.updateMatrixWorld();
 
-    this.createLinePath([office,internalServiceArea],"down")
+    let ps2=[]
+    line1.geometry.vertices.forEach((p)=>{
+      p.applyMatrix4( line1.matrixWorld );
+      ps2.push(p.clone());
+    })
+    this.addDebugLine(ps2)
+    // this.createLinePath([office,internalServiceArea],"down")
 
     // console.log(core.position,core.userData.jionLine[0])
 

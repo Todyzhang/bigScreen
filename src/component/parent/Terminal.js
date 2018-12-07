@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 
-class Terminal extends THREE.Mesh{
+class Terminal extends THREE.Object3D{
 
   constructor() {
     super();

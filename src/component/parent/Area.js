@@ -124,7 +124,7 @@ class Area extends Model {
 
   /**
    * 画模型组内的连接线路
-   * @param meshNames type:array 模型|模型名称 数组
+   * @param meshes type:array 模型|模型名称 数组
    * @param dir 线的方向 left|right|up|down
    * @param width  线的长度
    * @param offset 相对模型中心的偏移量
@@ -136,9 +136,9 @@ class Area extends Model {
    *        |
    *      right
    */
-  createLinePath(meshNames, dir = "up", width = 15, offset = 10) {
+  createLinePath(meshes, dir = "up", width = 15, offset = 10) {
     let pos = null, p1 = null, p2 = null, pf = null, pla = null, line,
-      offsetZ1 = 0, offsetZ2 = 0, offsetX1 = 0, offsetX2 = 0, len = meshNames.length - 1;
+      offsetZ1 = 0, offsetZ2 = 0, offsetX1 = 0, offsetX2 = 0, len = meshes.length - 1;
     let lineGeo = new THREE.Geometry();
     //少于1个不连
     if (len < 0) return;
@@ -161,7 +161,7 @@ class Area extends Model {
         offsetX2 = offsetX1 + width;
     }
 
-    meshNames.forEach((mesh, i) => {
+    meshes.forEach((mesh, i) => {
       mesh = typeof(mesh)==="string"?this.getObjectByName(mesh):mesh;
       if (mesh) {
         pos = mesh.position;
@@ -215,7 +215,7 @@ class Area extends Model {
   }
 
   /**
-   * 画Area块之前的连线
+   * 画Area块之间的连线
    * @param points
    */
   addAreaLine(points){
@@ -228,6 +228,22 @@ class Area extends Model {
     let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
 
     this.add(line);
+
+    return line;
+  }
+
+  addDebugLine(points){
+    let lineGeo = new THREE.Geometry();
+    let color=[new THREE.Color(0xff0000),new THREE.Color(0xffff00)];
+    lineGeo.vertices.push(...points);
+    points.forEach((v,i)=>{
+      lineGeo.colors.push(color[i%2]);
+    });
+    let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
+
+    this.add(line);
+
+    return line;
   }
 
   /**
@@ -274,8 +290,7 @@ class Area extends Model {
     }
 
 
-    let points=[pos1,...pos2];
-    this.addAreaLine(points)
+    return this.addAreaLine([pos1,...pos2]);
 
   }
 
