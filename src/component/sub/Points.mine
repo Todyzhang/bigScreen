@@ -1,0 +1,320 @@
+// import * as THREE from 'three';
+// import OBJLoader from 'three-obj-loader'
+import Model from '../Model';
+
+const THREE = require('three');
+const OBJLoader = require('three-obj-loader')(THREE);
+
+class Points extends Model{
+
+  init(){
+
+    this.progress=0;
+    this.curve=[];
+    this.createPoints();
+    // this.createCurvePath();
+
+  }
+
+  createPoints(){
+    var points;
+
+    var material = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 20,
+      // 使用 opacity 的前提是开启 transparent
+      opacity: 0.6,
+      transparent: true,
+      // 设置元素与背景的融合模式
+      blending: THREE.AdditiveBlending,
+      // 指定粒子的纹理
+      map: this.generateSprite(),
+      // 用于去除纹理的黑色背景
+      depthTest: false
+    })
+    let geo=new THREE.SphereGeometry(1,1,1)
+    points = new THREE.ParticleSystem(geo, material);
+    points.visible=false;
+    points.position.y=2
+    this.add(points);
+    this.points=points;
+
+  }
+
+  // 生成纹理
+  generateSprite() {
+
+    let canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+
+    let context = canvas.getContext('2d');
+    let gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.2, 'rgba(0,255,255,1)');
+    gradient.addColorStop(0.4, 'rgba(0,0,64,1)');
+    gradient.addColorStop(1, 'rgba(0,0,0,1)');
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    let texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  createCurvePath(points){
+    let curve = new THREE.CatmullRomCurve3(points,false/*是否闭合*/);
+    // let tubeGeometry2 = new THREE.TubeGeometry(curve, 100, 2, 50, false);
+    // let tubeMaterial2 = new THREE.MeshPhongMaterial({
+    //   color: 0x4488ff,
+    //   transparent: true,
+    //   opacity: 0.5,
+    // });
+    // let tube2 = new THREE.Mesh(tubeGeometry2, tubeMaterial2);
+    // this.add(tube2)
+    this.curve=curve;
+
+  }
+
+  /**
+   *
+   * @param from
+   * @param to
+   */
+  createPath(from,to){
+    //相同返回一个
+    if(from===to){
+      return [from];
+    }
+    let fromAry=from.match(/[A-Z]\d{3}/g);
+    let toAry=to.match(/[A-Z]\d{3}/g);
+    let f_len=fromAry.length,
+      t_len=toAry.length,
+      len=Math.min(f_len,t_len),
+      f_sub="",
+      t_sub="",
+      f_item_ary,
+      t_item_ary,
+      sameArea=-1,
+      isSameFloor=false,
+      sameName="";
+    let path=[];
+
+
+
+    for(let i=len-1;i>=0;i--){
+      f_sub=from.substr(0,from.indexOf(fromAry[i])+4);
+      t_sub=to.substr(0,to.indexOf(toAry[i])+4);
+      if(f_sub===t_sub){
+        if(i+1<len){
+          f_item_ary=fromAry[i+1].split("");
+          t_item_ary=toAry[i+1].split("");
+          /*
+            true-同区域且同层 false-同区域不同层
+            Business 的B层不在此项
+           */
+          isSameFloor=f_item_ary[0]===t_item_ary[0]&&f_item_ary[0]!=='B';
+        }
+        sameArea=i+1;
+        sameName=f_sub;
+        break;
+      }
+    }
+
+    for(let i=f_len-1;i>=0;i--){
+      f_sub=from.substr(0,from.indexOf(fromAry[i])+4);
+      if(f_sub===sameName){
+        if(!isSameFloor){
+          f_sub!=="A101B101C101"&&f_sub!=="A101B101C102"&&path.push(f_sub);
+        }else{
+          break;
+        }
+      }else{
+        f_sub!=="A101B101C101"&&f_sub!=="A101B101C102"&&path.push(f_sub);
+      }
+    }
+    if(sameArea===-1){
+      sameArea=0;
+    }
+    for(let i=0+sameArea;i<t_len;i++){
+      t_sub=to.substr(0,to.indexOf(toAry[i])+4);
+      t_sub!=="A101B101C101"&&t_sub!=="A101B101C102"&&path.push(t_sub);
+    }
+
+    console.log(from,to,path)
+
+    this.path=path;
+    this.to=this.parent.getObjectByName(to)
+    return path;
+
+  }
+
+  parsePathToPoints(path){
+    let points=[];//向量队列
+    path=path||this.path||[];
+    let parent=this.parent;
+    let len=path.length;
+    if(path.length<2) throw new Error("路径数据必须大于2个");
+
+    for(let i=0;i<len-1;i++){
+      /*
+        1.判断当前到下一个是向上连还是向下连，方法是判断当前及下一个的名称位数大小，
+          大-》小 向上；小-》大 向下；相同 同区域
+          取当前的userData.points，向上points倒序加入队列，向下顺序加入
+        2.判断当前与上一个的关系
+
+       */
+      let curt=path[i];
+      let next=path[i+1];
+
+      let ter=parent.getObjectByName(curt);
+      let ps=ter.userData.points;
+      let ops=ter.userData.outPoints;
+      let ocps=ter.userData.outCornetPoints;
+      ps=ps&&ps.concat();
+      ops=ops&&ops.concat();
+      ocps=ocps&&ocps.concat();
+      if(curt.length>next.length){//向上
+
+        if(ps){
+          points.push(...ps.reverse())
+        }
+        if(ops){
+          points.push(...ops)
+        }
+        if(ocps){
+          points.push(...ocps.reverse())
+        }
+      }
+      else if(curt.length<next.length){//向下
+
+        if(ps){
+          points.push(...ps)
+        }
+        if(ops){
+          points.push(...ops)
+        }
+        if(ocps){
+          points.push(...ocps)
+        }
+      }
+      else{//相同
+        if(ps){
+          points.push(...ps.reverse())
+        }
+        if(curt.indexOf("A101B101C10")!=-1){
+          if(ops){
+            points.push(...ops)
+          }
+          if(ocps){
+            points.push(...ocps.reverse())
+          }
+        }else{
+          //相同层不加outPoints
+          let c_floor=curt.match(/([A-Z])(\d)(\d\d)$/)[2];
+          let n_floor=next.match(/([A-Z])(\d)(\d\d)$/)[2];
+          if(c_floor!==n_floor&&ops){
+            points.push(...ops)
+          }
+        }
+
+
+      }
+    }
+    //todo最后一项
+    let last=path[len-1];
+    let prev=path[len-2];
+    let ter_l=parent.getObjectByName(last);
+
+    let ps=ter_l.userData.points;
+    let ops=ter_l.userData.outPoints;
+    let ocps=ter_l.userData.outCornetPoints;
+    ps=ps&&ps.concat();
+    ops=ops&&ops.concat();
+    ocps=ocps&&ocps.concat();
+    if(last.length<prev.length){//向上
+
+      if(ocps){
+        points.push(...ocps)
+      }
+      if(ops){
+        points.push(...ops)
+      }
+      if(ps){
+        points.push(...ps)
+      }
+    }
+    else if(last.length>prev.length){//向下
+
+      if(ocps){
+        points.push(...ocps)
+      }
+      if(ops){
+        points.push(...ops)
+      }
+      if(ps){
+        points.push(...ps)
+      }
+
+    }
+    else{//相同
+      if(last.indexOf("A101B101C10")!=-1){
+        if(ocps){
+          points.push(...ocps)
+        }
+        if(ops){
+          points.push(...ops)
+        }
+      }else{
+        //相同层不加outPoints
+        let c_floor=last.match(/([A-Z])(\d)(\d\d)$/)[2];
+        let n_floor=prev.match(/([A-Z])(\d)(\d\d)$/)[2];
+        if(c_floor!==n_floor&&ops){
+          points.push(...ops)
+        }
+      }
+
+
+      if(ps){
+        points.push(...ps)
+      }
+
+    }
+
+
+
+
+    this.debugPoints(points);
+    this.createCurvePath(points);
+
+
+
+  }
+
+
+
+  // 渲染函数
+  render() {
+    // 使用加减法可以设置不同的运动方向
+    if(this.curve.length===0) return;
+    this.points.visible=true;
+    if(this.progress>1.0){
+      this.curve=[];
+      this.points.visible=false;
+      this.to.setStatus("warn");
+      return;    //停留在管道末端,否则会一直跑到起点 循环再跑
+    }
+    this.progress += 0.009;
+    if(this.curve){
+      let point = this.curve.getPoint(this.progress);
+      if(point&&point.x){
+        this.points.position.set(point.x,point.y,point.z);
+      }
+    }
+
+  }
+
+}
+
+export default Points

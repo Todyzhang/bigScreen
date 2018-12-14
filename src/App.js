@@ -4,6 +4,9 @@ import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 import utils from './utils/utils';
 import Stage from './component/parent/Stage';
+import * as Stats from "three-stats"
+import InfoUI from "./component/parent/InfoUI";
+// const Stats =require('three-stats')
 
 
 const coordinates = {
@@ -34,6 +37,7 @@ class App extends Component {
     camera: null,
     renderer: null,
     stage:null,
+    stats:null,
     config: {
       background: 0x000000
     }
@@ -51,7 +55,7 @@ class App extends Component {
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      canvas: document.querySelector('canvas')
+      canvas: document.getElementById('three-scene')
     });
     renderer.setSize(width, height)
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -74,18 +78,32 @@ class App extends Component {
 
   render() {
     return (
-
-        <canvas />
+      <div>
+        <div id="Stats-output"></div>
+        <canvas id="three-scene" />
+      </div>
     );
   }
 
   buildAuxSystem = () => {
-    const { camera, renderer } = this.state;
+    const {scene, camera, renderer } = this.state;
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.25
     controls.rotateSpeed = 0.35
+
+    var stats = new Stats.Stats();
+    this.setState({stats})
+    //设置统计模式
+    stats.setMode(0); // 0: fps, 1: ms
+    //统计信息显示在左上角
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    //将统计对象添加到对应的<div>元素中
+    document.getElementById("Stats-output").appendChild(stats.domElement);
+
   }
 
   buildLightSystem = () => {
@@ -106,11 +124,12 @@ class App extends Component {
   }
   buildAxis(){
     const { scene} = this.state;
-    // scene.add(new THREE.AxesHelper(300))
+    scene.add(new THREE.AxesHelper(300))
   }
 
   loop = () => {
-    const { renderer, scene, camera,stage } = this.state;
+    const { renderer, scene, camera,stage,stats } = this.state;
+    stats&&stats.update()
     renderer.render(scene, camera)
     stage&&stage.animate();
     requestAnimationFrame(this.loop)
@@ -121,7 +140,7 @@ class App extends Component {
     let stage=new Stage();
     this.setState({
       stage:stage
-    })
+    });
     scene.add(stage);
   }
 

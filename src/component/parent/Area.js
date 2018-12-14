@@ -2,8 +2,15 @@ import * as THREE from 'three';
 import Model from '../Model';
 import {sign} from '../../texture';
 import Terminal from "./Terminal";
-
+// import 'three/examples/js/lines/Line2';
+import {Line2} from 'three/examples/js/lines/Line2';
 const fontUrl = './fonts/Microsoft YaHei_Bold.json';
+// const THREE = require('three');
+// window.THREE=THREE;
+// require('three/examples/js/lines/Line2');
+// require('imports-loader?THREE=three!three/examples/js/lines/Line2');
+
+// THREE.Line2=require('imports?THREE=three!exports?THREE.Line2!three\/examples\/js\/lines\/Line2');
 
 class Area extends Model {
 
@@ -97,19 +104,25 @@ class Area extends Model {
    * 画边框线
    * @param offsetX
    * @param offsetZ
+   * @param width 指定宽度
+   * @param height 指定高度
+   * @param isCenter 是否居中
    */
-  createBorder(offsetX = 20, offsetZ = 20,isCenter=false) {
-    let box3 = new THREE.Box3(), size;
-    box3.expandByObject(this);
-    size = box3.getSize();
-    let {x, z} = size;
-    x += offsetX;
-    z += offsetZ;
-
+  createBorder(offsetX = 20, offsetZ = 20,width=0,height=0,isCenter=false) {
+    let x,z,border;
+    let geometry = new THREE.Geometry(), line;
+    if(width>0&&height>0){
+      x=width;
+      z=height;
+    }else{
+      border=this.getBorder();
+      x=border.x;
+      z=border.z;
+    }
+    x+=offsetX;
+    z+=offsetZ;
     this.borderX=x;
     this.borderZ=z;
-
-    let geometry = new THREE.Geometry(), line;
     geometry.vertices.push(
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(x, 0, 0),
@@ -123,7 +136,72 @@ class Area extends Model {
   }
 
   /**
-   * 画模型组内的连接线路
+   * 得到box size
+   * @returns {{x: *, z: *}}
+   */
+  getBorder(){
+    if(this.borderX&&this.borderZ) return {x:this.borderX,z:this.borderZ};
+    
+    let box3 = new THREE.Box3(), size;
+    box3.expandByObject(this);
+    size = box3.getSize();
+    let {x, z} = size;
+
+    this.borderX=x;
+    this.borderZ=z;
+    return {x:x,z:z};
+  }
+
+  /**
+   * 以当前区域坐标原点做参照，更新保存在Area子类及Terminal子类的边线点
+   * @param group
+   */
+  updateNodeData(group){
+    group.forEach((v)=>{
+      //把局部坐标更换成 本对象里的坐标，以便画线
+      let jl=v.userData.jionLine;
+      let pos=v.position;
+      jl&&jl.forEach((item)=>{
+        item[0].add(pos);
+        item[1].add(pos);
+      });
+      v.children.forEach((item)=>{
+        if(item instanceof Terminal&&item.userData.points){
+          item.userData.points.forEach((vv)=>{
+            vv.add(pos);
+          })
+        }
+      })
+    });
+  }
+
+  /**
+   * 画Area块之间的连线
+   * @param points 线条各端点数组
+   * @param lineColor 线条16进制颜色
+   */
+  addAreaLine(points,lineColor){
+    let lineGeo = new THREE.Geometry();
+    let color=[new THREE.Color(0x019fc4),new THREE.Color(0xffffff)];
+    if(lineColor) lineColor=new THREE.Color(lineColor);
+    lineGeo.vertices.push(...points);
+    points.forEach((v,i)=>{
+      if(lineColor){
+        lineGeo.colors.push(lineColor);
+      }else{
+        lineGeo.colors.push(color[i%2]);
+      }
+
+    });
+    let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
+
+    this.add(line);
+
+    return line;
+  }
+
+  /**
+   * 画模型组内的连接线路,模型原点在中间
    * @param meshes type:array 模型|模型名称 数组
    * @param dir 线的方向 left|right|up|down
    * @param width  线的长度
@@ -165,16 +243,18 @@ class Area extends Model {
       mesh = typeof(mesh)==="string"?this.getObjectByName(mesh):mesh;
       if (mesh) {
         pos = mesh.position;
-        p1 = new THREE.Vector3(pos.x + offsetX1, pos.y, pos.z + offsetZ1);
-        p2 = new THREE.Vector3(pos.x + offsetX2, pos.y, pos.z + offsetZ2);
-        if (i === 0) pf = p2;
-        if (i === len) pla = p2;
+        //靠近中心点的为前
+        p1 = new THREE.Vector3(pos.x + offsetX2, pos.y, pos.z + offsetZ2);
+        p2 = new THREE.Vector3(pos.x + offsetX1, pos.y, pos.z + offsetZ1);
+        if (i === 0) pf = p1;
+        if (i === len) pla = p1;
         mesh.userData.points = mesh.userData.points || [];
         mesh.userData.points.push(p1.clone(),p2.clone());
         lineGeo.vertices.push(p1, p2);
       }
 
     });
+
 
     this.userData.jionLine = this.userData.jionLine || [];
 
@@ -185,65 +265,9 @@ class Area extends Model {
       this.userData.jionLine.push([pf.clone(), pla.clone()]);
     }
 
-    line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color: 0x28d272}));
+    line = new Line2(lineGeo, new THREE.LineBasicMaterial({color: 0x28d272}));
     this.add(line);
 
-  }
-
-
-  /**
-   * 以当前区域坐标原点做参照，更新保存在Area子类及Terminal子类的边线点
-   * @param group
-   */
-  updateNodeData(group){
-    group.forEach((v)=>{
-      //把局部坐标更换成 本对象里的坐标，以便画线
-      let jl=v.userData.jionLine;
-      let pos=v.position;
-      jl&&jl.forEach((item)=>{
-        item[0].add(pos);
-        item[1].add(pos);
-      });
-      v.children.forEach((item)=>{
-        if(item instanceof Terminal&&item.userData.points){
-          item.userData.points.forEach((vv)=>{
-            vv.add(pos);
-          })
-        }
-      })
-    });
-  }
-
-  /**
-   * 画Area块之间的连线
-   * @param points
-   */
-  addAreaLine(points){
-    let lineGeo = new THREE.Geometry();
-    let color=[new THREE.Color(0x019fc4),new THREE.Color(0xffffff)];
-    lineGeo.vertices.push(...points);
-    points.forEach((v,i)=>{
-      lineGeo.colors.push(color[i%2]);
-    });
-    let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
-
-    this.add(line);
-
-    return line;
-  }
-
-  addDebugLine(points){
-    let lineGeo = new THREE.Geometry();
-    let color=[new THREE.Color(0xff0000),new THREE.Color(0xffff00)];
-    lineGeo.vertices.push(...points);
-    points.forEach((v,i)=>{
-      lineGeo.colors.push(color[i%2]);
-    });
-    let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
-
-    this.add(line);
-
-    return line;
   }
 
   /**
@@ -253,6 +277,7 @@ class Area extends Model {
    * @param dir 线的方向 left|right|up|down
    * @param offset1  向area2方向的偏移量
    * @param offset2  向area1方向的偏移量
+   * @param lineColor  16进制链接线条颜色
    *
    * 方向如下：
    *       left
@@ -261,16 +286,29 @@ class Area extends Model {
    *        |
    *      right
    */
-  createAreaLinePath(area1,area2,dir="up", offset1 = 0,offset2=0) {
+  createAreaLinePath(area1,area2,dir="up", offset1 = 0,offset2=0,lineColor) {
+    area1 = typeof(area1)==="string"?this.getObjectByName(area1):area1;
+    area2 = typeof(area2)==="string"?this.getObjectByName(area2):area2;
+    let isTerminal=area2 instanceof Terminal;
     let pos1=area1.position.clone();
     let pos2=[];
-    let notJionLine=!area2.userData.jionLine.length;
+    let area2_border=area2.getBorder();
+    let area2_center=area2.position.clone()
+    let notJionLine=!(area2.userData.jionLine&&area2.userData.jionLine.length);
 
-    !notJionLine&&area2.userData.jionLine.forEach((v)=>{
-      //得到点到线垂直相交的
-      pos2.push(new THREE.Line3(v[0],v[1]).closestPointToPoint(pos1));
-    });
-    notJionLine&&pos2.push(area2.position.clone());
+    if(notJionLine){
+      if(isTerminal){
+        pos2.push(area2_center)
+      }else{
+        pos2.push(area2_center.add(new THREE.Vector3(area2_border.x/2,0,-area2_border.z/2)));
+      }
+    }else{
+      area2.userData.jionLine.forEach((v)=>{
+        //得到点到线垂直相交点
+        pos2.push(new THREE.Line3(v[0],v[1]).closestPointToPoint(pos1));
+      });
+
+    }
     switch (dir) {
       case "up":
         pos1.setZ(pos1.z-offset1);
@@ -289,10 +327,85 @@ class Area extends Model {
         notJionLine&&pos2[0].setX(pos2[0].x-offset2);
     }
 
+    area1.userData.outPoints=area1.userData.outPoints||[];
+    area1.userData.outPoints.push(pos1);
 
-    return this.addAreaLine([pos1,...pos2]);
+    area2.userData.outPoints=area2.userData.outPoints||[];
+    area2.userData.outPoints.push(...pos2);
+
+
+    return this.addAreaLine([pos1,...pos2],lineColor);
 
   }
+
+  /**
+   * 画转弯(z)的区域块连接线路,注意：area的原点在左上角
+   * @param area1 主模型
+   * @param area2 次模型
+   * @param dir 线的方向 left|right|up|down
+   * @param offset1  向area2方向的偏移量
+   * @param offset2  向area1方向的偏移量
+   *
+   * 方向如下：
+   *       left
+   *        |
+   * down--area1--up
+   *        |
+   *      right
+   */
+  createAreaCornerLinePath(area1,area2,dir="up", offset1 = 5,offset2=10,isDebug) {
+    area1 = typeof(area1)==="string"?this.getObjectByName(area1):area1;
+    area2 = typeof(area2)==="string"?this.getObjectByName(area2):area2;
+    let pos1=area1.position.clone();
+    let pos2=[];
+    let pos3=area2.position.clone();
+    let notJionLine=!area2.userData.jionLine.length;//没有组内 层连线
+    let border=area2.getBorder();
+    let center=new THREE.Vector3(pos3.x+border.x/2,pos3.y,pos3.z+offset2);
+
+
+    !notJionLine&&area2.userData.jionLine.forEach((v)=>{
+      //得到点到线垂直相交的
+      pos2.push(new THREE.Line3(v[0],v[1]).closestPointToPoint(center));
+    });
+    notJionLine&&pos2.push(center);
+    //todo 暂时做了向上方向
+    // switch (dir) {
+    //   case "up":
+    //     center.setZ(center.z-offset1);
+    //     notJionLine&&pos2[0].setZ(pos2[0].z-offset2);
+    //     break;
+    //   case "down":
+    //     center.setZ(center.z+offset1);
+    //     notJionLine&&pos2[0].setZ(pos2[0].z+offset2);
+    //     break;
+    //   case "left":
+    //     center.setX(center.x-offset1);
+    //     notJionLine&&pos2[0].setX(pos2[0].x+offset2);
+    //     break;
+    //   default:
+    //     center.setX(center.x+offset1);
+    //     notJionLine&&pos2[0].setX(pos2[0].x-offset2);
+    // }
+    pos1.setZ(pos1.z-offset1);
+
+    area1.userData.outPoints=area1.userData.outPoints||[];
+    area1.userData.outPoints.push(pos1);
+
+    let points=[new THREE.Vector3(pos1.x,pos1.y,center.z),center];
+    area2.userData.outPoints=area2.userData.outPoints||[];
+    area2.userData.outPoints.push(...pos2);
+    area2.userData.outCornetPoints=area2.userData.outCornetPoints||[];
+    area2.userData.outCornetPoints.push(...points);
+
+    isDebug&&[pos1,...points,...pos2].forEach((v)=>{
+      this.debugPoint(v)
+    });
+    isDebug&&console.log(this)
+    return this.addAreaLine([pos1,...points,...pos2]);
+
+  }
+
 
 }
 
