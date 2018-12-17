@@ -1,24 +1,12 @@
 import * as THREE from 'three';
 import Model from '../Model';
-import {sign} from '../../texture';
+import {signBg} from '../../texture';
 import Terminal from "./Terminal";
-// import 'three/examples/js/lines/Line2';
-import {Line2} from 'three/examples/js/lines/Line2';
-const fontUrl = './fonts/Microsoft YaHei_Bold.json';
-// const THREE = require('three');
-// window.THREE=THREE;
-// require('three/examples/js/lines/Line2');
-// require('imports-loader?THREE=three!three/examples/js/lines/Line2');
 
-// THREE.Line2=require('imports?THREE=three!exports?THREE.Line2!three\/examples\/js\/lines\/Line2');
+const fontUrl = './fonts/Microsoft YaHei_Bold.json';
+
 
 class Area extends Model {
-
-  loadBg(){
-    return new Promise((resolve) => {
-      Model.loader.texture.load(sign.back, resolve)
-    });
-  }
 
   loadFont(){
     return new Promise((resolve) => {
@@ -31,11 +19,10 @@ class Area extends Model {
    * @param msg
    */
   createBgSign(msg,fontSize=5) {
+    this.loadFont().then((font)=>{
+      this.createWords(font, msg,fontSize,signBg);
+    });
 
-    Promise.all([this.loadBg(), this.loadFont()])
-      .then(([bg, font]) => {
-        this.createWords(font, msg,fontSize,bg);
-      })
   }
 
   /**
@@ -61,7 +48,8 @@ class Area extends Model {
       color: color,
       transparent: true,
       opacity: 1,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      depthTest:false
     });
     const shapes = font.generateShapes(msg, fontSize);
     const geo = new THREE.ShapeBufferGeometry(shapes);
@@ -81,7 +69,7 @@ class Area extends Model {
    * @param text
    */
   createPlane(bg,text){
-    const material = new THREE.MeshBasicMaterial({map: bg, transparent: true, side: THREE.DoubleSide});
+    const material = new THREE.MeshBasicMaterial({map: bg, transparent: true, side: THREE.DoubleSide,depthTest:true});
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 60), material);
     //通过传入的object3D对象来返回当前模型的最小大小，值可以使一个mesh也可以使group
     //居中文字
@@ -130,8 +118,11 @@ class Area extends Model {
       new THREE.Vector3(0, 0, -z)
     );
 
+
     line = new THREE.LineLoop(geometry, new THREE.LineBasicMaterial({color: 0x009ad8}));
     this.add(line);
+    // line.position.y=0.1
+    // line.rotateZ(Math.PI/2)
     isCenter&&line.position.set(-x/2,0,z/2)
   }
 
@@ -265,7 +256,8 @@ class Area extends Model {
       this.userData.jionLine.push([pf.clone(), pla.clone()]);
     }
 
-    line = new Line2(lineGeo, new THREE.LineBasicMaterial({color: 0x28d272}));
+    line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color: 0x28d272}));
+    line.position.y=0.1
     this.add(line);
 
   }

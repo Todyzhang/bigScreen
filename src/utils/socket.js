@@ -1,27 +1,35 @@
 /**
- * var ws=new socket("ws://192.168.126.40:8001",(data)=>{
+ * var ws=new socket("ws://192.168.128.153:8489/tq/train/info",(data)=>{
       console.log("ws:",data)
     });
  */
 class Socket {
   constructor(wsUrl,cb){
-    this.ws=new WebSocket(wsUrl);
+    this.ws=null;
+    this.wsUrl=wsUrl;
     this.callback=cb;
+
+    this.createWS();
     this.addEvents();
   }
 
+  createWS(){
+    this.ws=new WebSocket(this.wsUrl);
+  }
+
   addEvents(){
-    let that=this;
     this.ws.onopen = (evt)=>this.onOpen(evt)
     this.ws.onclose = (evt)=>this.onClose(evt)
     this.ws.onerror = (evt)=>this.onError(evt)
 
-    this.ws.onmessage = (evt)=>this.onMessage(evt)
+    this.ws.onmessage = (evt)=>this.onMessage(evt);
+
+    window.onbeforeunload=(evt)=>this.onBeforeUnload(evt);
   }
 
   onOpen(evt){
     console.log('websocket connect')
-    this.ws.send('game1')
+    // this.ws.send('game1')
   }
 
   onError(evt){
@@ -42,8 +50,12 @@ class Socket {
     // }
 
   }
+  onBeforeUnload(evt){
+    this.ws.send('quit');
+  }
 
   onClose(evt){
+    this.createWS();
     console.log('websocket close')
   }
 }

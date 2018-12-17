@@ -7,7 +7,7 @@ import Stage from './component/parent/Stage';
 import * as Stats from "three-stats"
 import InfoUI from "./component/parent/InfoUI";
 // const Stats =require('three-stats')
-
+window.THREE=THREE
 
 const coordinates = {
   externalServiceDistr: {

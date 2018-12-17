@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Terminal from '../../parent/Terminal'
-import {computer, host} from "../../../texture"
+import {host} from "../../../texture"
 
 class Cube extends Terminal{
 
@@ -8,25 +8,41 @@ class Cube extends Terminal{
    * 创建外观纹理材质
    */
   createMaterial(){
-    const loader=Terminal.loader;
     let back=new THREE.MeshPhongMaterial({
-        map:loader.load(computer.back)
+        map:host.normal.back
       }),
       side=new THREE.MeshPhongMaterial({
-        map:loader.load(host.side)
+        map:host.normal.side
+      }),
+      top=new THREE.MeshPhongMaterial({
+        map:host.normal.top
       });
 
-    this.materials=[side,back];
+    this.materials={side,back,top};
 
   }
-
+  setNoramlMaterial(){
+    this.materials.side.map=host.normal.side;
+    this.materials.back.map=host.normal.back;
+    this.materials.top.map=host.normal.top;
+  }
+  setAlarmMaterial(){
+    this.materials.side.map=host.alarm.side;
+    this.materials.back.map=host.alarm.back;
+    this.materials.top.map=host.alarm.top;
+  }
+  setWarnMaterial(){
+    this.materials.side.map=host.warn.side;
+    this.materials.back.map=host.warn.back;
+    this.materials.top.map=host.warn.top;
+  }
   /**
    * 创建主体
    */
   createMainCube(){
     let mtrs=this.materials;
-
-    const box = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10, 1, 3, 1), [mtrs[0], mtrs[0], mtrs[1], null, mtrs[0], mtrs[0]]);
+    //左边 右边 上边 下边 前边 后边
+    const box = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10, 1, 3, 1), [mtrs.side, mtrs.side, mtrs.top, null, mtrs.side, mtrs.side]);
 
     const square = new THREE.Geometry();
     const halfSize = 10 / 2;

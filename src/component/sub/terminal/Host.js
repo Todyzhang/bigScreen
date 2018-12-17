@@ -1,4 +1,4 @@
-import{host} from "../../../texture";
+import {host} from "../../../texture";
 import * as THREE from 'three';
 import Terminal from '../../parent/Terminal'
 
@@ -14,24 +14,40 @@ class Host extends Terminal{
    * 创建外观纹理材质
    */
   createMaterial(){
-    const loader=Terminal.loader;
     let top=new THREE.MeshPhongMaterial({
-      map:loader.load(host.top)
+      map:host.normal.top
     }),
      front=new THREE.MeshPhongMaterial({
-      map:loader.load(host.front)
+      map:host.normal.front
     }),
      back=new THREE.MeshPhongMaterial({
-      map:loader.load(host.back)
+      map:host.normal.back
     }),
     side=new THREE.MeshPhongMaterial({
-      map:loader.load(host.side)
+      map:host.normal.side
     });
 
-    this.materials=[top,front,back,side];
+    this.materials={top,front,back,side};
 
   }
-
+  setNoramlMaterial(){
+    this.materials.top.map=host.normal.side;
+    this.materials.front.map=host.normal.front;
+    this.materials.back.map=host.normal.back;
+    this.materials.side.map=host.normal.back;
+  }
+  setAlarmMaterial(){
+    this.materials.top.map=host.alarm.side;
+    this.materials.front.map=host.alarm.front;
+    this.materials.back.map=host.alarm.back;
+    this.materials.side.map=host.alarm.back;
+  }
+  setWarnMaterial(){
+    this.materials.top.map=host.warn.side;
+    this.materials.front.map=host.warn.front;
+    this.materials.back.map=host.warn.back;
+    this.materials.side.map=host.warn.back;
+  }
   /**
    * 创建主体
    */
@@ -39,7 +55,7 @@ class Host extends Terminal{
     let mtrs=this.materials;
     this.mainCube = new THREE.Mesh(
       new THREE.CubeGeometry(58, 120, 95),
-      [mtrs[3],mtrs[3],mtrs[0],mtrs[0],mtrs[1],mtrs[2]] //左边 右边 上边 下边 前边 后边
+      [mtrs.side,mtrs.side,mtrs.top,null,mtrs.front,mtrs.back] //左边 右边 上边 下边 前边 后边
     );
 
     this.add(this.mainCube)

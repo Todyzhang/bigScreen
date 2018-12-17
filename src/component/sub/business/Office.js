@@ -1,6 +1,5 @@
 import Area from '../../parent/Area';
 import Cube from "../terminal/Cube";
-import Host from "../terminal/Host";
 import Laptop from "../terminal/Laptop";
 
 class Office extends Area{

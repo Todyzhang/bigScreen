@@ -5,7 +5,8 @@ import utils from "../../utils/utils";
 import Business from "../sub/business"
 import Honeynet from "../sub/honeynet"
 import Points from "../sub/Points"
-
+import socket from '../../utils/Socket'
+import pool from './Pool'
 
 class Stage extends Model {
 
@@ -25,34 +26,22 @@ class Stage extends Model {
 
     //以当前原点为基准，更新business下terminal保存的坐标数据
     let center = business.position;
-    // console.log("center",center)
     Object.keys(utils.namespace).forEach((key) => {
       let ter = this.getObjectByName(key);
       let ud = ter.userData;
       ud.points && ud.points.forEach((v, i, ary) => {
         ary[i] = v.clone().add(center);
-        // this.debugPoint(v);
       });
       ud.outPoints && ud.outPoints.forEach((v, i, ary) => {
         ary[i] = v.clone().add(center);
-        // this.debugPoint(v);
       });
       ud.outCornetPoints && ud.outCornetPoints.forEach((v, i, ary) => {
         ary[i] = v.clone().add(center);
-        // this.debugPoint(v);
       });
 
     });
 
-
-    // this.points.createPath('A101','A101B101C101D101');
-    // this.points.createPath('A101B101C102D101','A101');
-    // this.points.createPath('A101B301C107','A201');
-    // this.points.createPath('A101B301C107','A101B401C102');
-    // this.points.createPath('A101B301C107','A101B301C101');
-    // this.points.createPath('A101B301C201','A101B301C107');
-    // this.points.createPath('A101B301C201','A101B101');
-    const pointArr = ['A101B101C102D101', 'A101B301C107', 'A101B101C101D101'];
+    const pointArr = ['A101B101C102D101', 'A101B301C107', 'A101B101C101D101','A101B301','A101B201C101','A101B401C102'];
 
     setTimeout(() => {
       setInterval(() => {
@@ -66,16 +55,20 @@ class Stage extends Model {
 
     }, 8000)
 
+    this.connect();
   }
 
-
+  connect(){
+    new socket("ws://192.168.128.153:8489/tq/train/info",(data)=>{
+      console.log("ws:",data)
+    });
+  }
 
   //动画统一入口
   animate() {
 
     this.rotateY(-this.aminateRad);//旋转地板
-    // this.points&&this.points.render()
-    this.points && this.points.updateTween()
+    this.points && this.points.animate()
   }
 
 

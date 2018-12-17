@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Terminal from '../../parent/Terminal'
-import { computer, host } from "../../../texture"
+import {computer, host} from "../../../texture"
 
 
 class Computer extends Terminal {
@@ -9,21 +9,38 @@ class Computer extends Terminal {
    * 创建外观纹理材质
    */
   createMaterial() {
-    const loader = Terminal.loader;
     let front = new THREE.MeshPhongMaterial({
-      map: loader.load(computer.front)
+      map: computer.normal.front
     }),
       back = new THREE.MeshPhongMaterial({
-        map: loader.load(computer.back)
+        map: computer.normal.back
       }),
       side = new THREE.MeshPhongMaterial({
-        map: loader.load(host.side)
+        map: host.normal.side
       }),
       keyboard = new THREE.MeshBasicMaterial({
-        map: loader.load(computer.keyboard)
+        map: computer.normal.keyboard
       });
 
-    this.materials = [side, front, back,keyboard];
+    this.materials = {side, front, back,keyboard};
+  }
+  setNoramlMaterial(){
+    this.materials.side.map=host.normal.side;
+    this.materials.front.map=computer.normal.front;
+    this.materials.back.map=computer.normal.back;
+    this.materials.keyboard.map=computer.normal.keyboard;
+  }
+  setAlarmMaterial(){
+    this.materials.side.map=host.alarm.side;
+    this.materials.front.map=computer.alarm.side;
+    this.materials.back.map=computer.alarm.back;
+    this.materials.keyboard.map=computer.alarm.keyboard;
+  }
+  setWarnMaterial(){
+    this.materials.side.map=host.warn.side;
+    this.materials.front.map=computer.warn.front;
+    this.materials.back.map=computer.warn.back;
+    this.materials.keyboard.map=computer.warn.keyboard;
   }
 
   /**
@@ -38,7 +55,7 @@ class Computer extends Terminal {
   createScreen() {
     let mtrs = this.materials;
 
-    let screen = new THREE.Mesh(new THREE.BoxGeometry(17, 10, 1), [mtrs[0], mtrs[0], mtrs[0], null, mtrs[1], mtrs[2]]);
+    let screen = new THREE.Mesh(new THREE.BoxGeometry(17, 10, 1), [mtrs.side, mtrs.side, mtrs.side, null, mtrs.front, mtrs.back]);
     screen.position.y = 4 + 5.5 - 1;
     screen.position.z = -5;
 
@@ -46,7 +63,7 @@ class Computer extends Terminal {
   }
 
   createKeyboard() {
-    let keyboard = new THREE.Mesh(new THREE.BoxGeometry(17, 0.5, 5),this.materials[0]);
+    let keyboard = new THREE.Mesh(new THREE.BoxGeometry(17, 0.5, 5),this.materials.keyboard);
     keyboard.position.z = 2;
     keyboard.position.y = 0.25;
 
@@ -80,7 +97,7 @@ class Computer extends Terminal {
     circleShape.quadraticCurveTo(- circleRadius, - circleRadius, - circleRadius, 0);
     circleShape.quadraticCurveTo(- circleRadius, circleRadius, 0, circleRadius);
     const geometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
-    const mesh = new THREE.Mesh(geometry, this.materials[0]);
+    const mesh = new THREE.Mesh(geometry, this.materials.side);
     return mesh;
   }
 

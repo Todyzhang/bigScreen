@@ -1,42 +1,31 @@
 import * as THREE from 'three';
 // import TWEEN from 'three-tween';
 import Model from '../Model';
-import arrow from '../../textures/arrow.png';
+import {arrowBg} from '../../texture';
 const TWEEN = require('@tweenjs/tween.js');
 
 class Points extends Model {
 
   init() {
-    this.progress = 0;
-    this.curve = [];
+    this.animated = false;
     this.createPoints();
-    // this.createCurvePath();
-
   }
 
   createPoints() {
-    let pointGeo = new THREE.BoxGeometry(5, 5, 5);
-    let pointMesh = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    let point = new THREE.Mesh(pointGeo, pointMesh);
-    this.add(point);
-    point.visible = false;
-    this.points = point
+    if(this.points){
+      return this.points.clone();
+    }else{
+      const planeGeo=new THREE.PlaneGeometry(10,10);
+      const material=new THREE.MeshBasicMaterial({map: arrowBg,transparent:true, side: THREE.DoubleSide});
+      const arrow_plane = new THREE.Mesh( planeGeo, material );
+      arrow_plane.rotation.x=Math.PI/2;
+      arrow_plane.position.y=0.01;
+      this.points = arrow_plane;
+      arrow_plane.visible=false;
+      return arrow_plane.clone();
+    }
   }
 
-
-  createCurvePath(points) {
-    let curve = new THREE.CatmullRomCurve3(points, false/*是否闭合*/);
-    let tubeGeometry2 = new THREE.TubeGeometry(curve, 100, 2, 50, false);
-    let tubeMaterial2 = new THREE.MeshPhongMaterial({
-      color: 0x4488ff,
-      transparent: true,
-      opacity: 0.5,
-    });
-    let tube2 = new THREE.Mesh(tubeGeometry2, tubeMaterial2);
-    this.add(tube2)
-    this.curve = curve;
-
-  }
 
   /**
    *
@@ -156,7 +145,7 @@ class Points extends Model {
         if (ps) {
           points.push(...ps.reverse())
         }
-        if(curt.indexOf("A101B101C10")!=-1){
+        if(curt.indexOf("A101B101C10")!==-1){
           if(ops){
             points.push(...ops)
           }
@@ -212,7 +201,7 @@ class Points extends Model {
 
     }
     else {//相同
-      if(last.indexOf("A101B101C10")!=-1){
+      if(last.indexOf("A101B101C10")!==-1){
         if(ocps){
           points.push(...ocps)
         }
@@ -243,7 +232,7 @@ class Points extends Model {
 
   move(points, currentTarget) {
     if (!points || points.length < 2) return;
-    const obj = this.createRouteObj2();
+    const obj = this.createPoints();
     this.add(obj);
     const startPoint = points[0];
     obj.position.x = startPoint.x;
@@ -284,79 +273,21 @@ class Points extends Model {
     }
     tweenArr[tweenArr.length - 1].onComplete(() => {
       this.remove(obj);
-      currentTarget.setStatus("warn");
+      currentTarget.setStatus("alarm");
     });
+    obj.visible=true;
     tweenArr[0].start();
+    this.animated=true;
   }
 
-  createRouteObj() {
-    const shape = new THREE.Shape();
-    shape.moveTo(-3.5, 0);
-    shape.lineTo(-2, 2);
-    shape.lineTo(-2, 1);
-    shape.lineTo(2, 1);
-    shape.lineTo(2, -1);
-    shape.lineTo(-2, -1);
-    shape.lineTo(-2, -2);
-    shape.lineTo(-3.5, 0);
 
-    const curvePts = [];
-    curvePts.push(new THREE.Vector3(0,0,0));
-    curvePts.push(new THREE.Vector3(0,1,0));
-    const extrudePath = new THREE.CatmullRomCurve3(curvePts);
-
-    const extrudeSettings = {
-      extrudePath,
-      bevelEnabled: false,
-    };
-
-    const arrowGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    const arrowMaterial = new THREE.MeshPhongMaterial({ color: 0xd93a49 });
-    const mesh = new THREE.Mesh(arrowGeo, arrowMaterial);
-    // mesh.rotation.x=Math.PI/2;
-    // this.add(mesh)
-
-    // const geometry = new THREE.SphereGeometry(2.5, 32, 32);
-    // const material = new THREE.MeshPhongMaterial({ color: 0xCE0000 });
-    // const obj = new THREE.Mesh(geometry, material);
-    // obj.position.set(50, 2.5, 50);
-    return mesh;
-  }
-
-  createRouteObj2(){
-    const planeGeo=new THREE.PlaneGeometry(10,10);
-    const texture=new THREE.TextureLoader().load(arrow);
-    const material=new THREE.MeshBasicMaterial({map: texture,transparent:true, side: THREE.DoubleSide});
-    const plane = new THREE.Mesh( planeGeo, material );
-    plane.rotation.x=Math.PI/2;
-    plane.position.y=0.01;
-    return plane;
-  }
-
-  updateTween() {
-    TWEEN.update();
-  }
-
-  // 渲染函数
-  render() {
-    // 使用加减法可以设置不同的运动方向
-    if (this.curve.length === 0) return;
-    this.points.visible = true;
-    if (this.progress > 1.0) {
-      this.curve = [];
-      this.points.visible = false;
-      this.to.setStatus("warn");
-      return;    //停留在管道末端,否则会一直跑到起点 循环再跑
-    }
-    this.progress += 0.009;
-    if (this.curve) {
-      let point = this.curve.getPoint(this.progress);
-      if (point && point.x) {
-        this.points.position.set(point.x, point.y, point.z);
-      }
+  animate() {
+    if(this.animated){
+      TWEEN.update();
     }
 
   }
+
 
 }
 

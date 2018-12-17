@@ -45,9 +45,9 @@ let utils = {
     let material
     let mesh
     if (type === 'lambert') {
-      material = new THREE.MeshLambertMaterial({color: color})
+      material = new THREE.MeshLambertMaterial({color: color,depthTest:true})
     } else if (type === 'phong') {
-      material = new THREE.MeshPhongMaterial({color: color})
+      material = new THREE.MeshPhongMaterial({color: color,depthTest:true})
     } else {
       console.error('unrecognized type!')
     }
@@ -103,7 +103,8 @@ let utils = {
     "A101B401C101":1,
     "A101B401C102":1,
     // "A201":1
-  }
+  },
+  animateAry:[]
 }
 
 export default utils
