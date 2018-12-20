@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 
-
 class Model extends THREE.Group{
   constructor(){
     super();

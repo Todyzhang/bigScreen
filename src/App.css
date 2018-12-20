@@ -1,0 +1,178 @@
+@font-face{
+    font-family: 'pangmenzhengdao'; 
+    src:url('./fonts/pangmenzhengdao.ttf') format('truetype');
+}
+
+body{
+    background-color: #000;
+}
+
+#main{
+    overflow: hidden;
+    position: relative;
+}
+
+#displayBoard{
+    float:right;
+}
+
+#title{
+    background:url('./img/title.png') no-repeat center bottom;
+    width: 1618px;
+    height: 70px;
+    margin-left: 30px;
+    
+}
+
+#countDown{
+    color:#08ecfb;
+    line-height: 70px;
+    position:absolute;
+    right:20px;
+    top:0;
+    z-index: 1;
+}
+
+#left{
+    background:url('./img/left.png') no-repeat center;
+    width: 345px;
+    height: 928px;
+    position: absolute;
+    top:30px;
+    left:20px;
+}
+
+.ranks{
+    margin-top:115px;
+    margin-left:20px;
+    margin-right:20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 740px;
+}
+
+.rank{
+    display: flex;
+    justify-content: space-between;
+}
+
+.rank-middle{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 45px;
+}
+
+.rank:first-child .num{
+    color:#ff9090;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.rank:first-child .team-name{
+    color: #ff9090;
+    font-size: 24px;
+    font-weight: bold;
+}
+.rank:nth-child(2) .num{
+    color:#ffb39a;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.rank:nth-child(2) .team-name{
+    color: #ffb39a;
+    font-size: 22px;
+    font-weight: bold;
+}
+.rank:nth-child(3) .num{
+    color:#feef8b;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.rank:nth-child(3) .team-name{
+    color: #feef8b;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.rank .num{
+    color:#fff;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 48px;
+    font-family: pangmenzhengdao;
+    width: 22px;
+    text-align: center;
+}
+
+.rank .avatar{
+    display: flex;
+    align-items: center;
+}
+
+.rank .team-name{
+    color:green;
+    font-size: 18px;
+    color: #85d6d5;
+}
+
+.percentage{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.percentage-bar{
+    width: 193px;
+    height: 6px;
+    background-color: rgba(12,169,215,0.2);
+    border-radius: 3px;
+}
+
+.percentage-bar-mask{
+    width: 100px;
+    height: 5px;
+    background:linear-gradient(to right, rgba(0,247,248,0), rgba(0,255,255,1));
+    border-radius: 3px;
+    transition: width 1s;
+}
+
+.rank-right{
+    font-size: 18px;
+    color:#fff;
+    display: flex;
+    align-items: flex-end;
+}
+
+#scrollInfo{
+    position:absolute;
+    right:20px;
+    bottom:40px;
+    height: 175px;
+    width: 600px;
+    overflow: hidden;
+}
+
+.info-item{
+    color:#b1fffa;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.info-time{
+    text-align: right;
+}
+
+.info-content{
+    text-align: right;
+}
+
+.info-items{
+    position: absolute;
+    right:0;
+    bottom:0;
+    transition:all 1s;
+}

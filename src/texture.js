@@ -49,41 +49,41 @@ import w_node_s from './textures/node/warn/side.jpg';
 import txt_b from './textures/sign_b.png';
 import arrow_t from './textures/arrow.png';
 
+import publicVal from "./utils/publicVal";
 
-import Model from "./component/Model";
-
-const loader = Model.loader.texture;
-const load = function (img) {
+let loader = publicVal.loader.texture;
+let load = function (img) {
   return loader.load(img)
 };
 
-const aio = {
+
+let aio = {
   normal: {front: load(n_aio_f)},
-  alarm: {front: load(a_aio_f),back:load(a_aio_b)},
-  warn: {front: load(w_aio_f),back:load(w_aio_b)}
+  alarm: {front: load(a_aio_f), back: load(a_aio_b)},
+  warn: {front: load(w_aio_f), back: load(w_aio_b)}
 };
-const computer = {
+let computer = {
   normal: {front: load(n_computer_f), back: load(n_computer_b), side: load(n_computer_s), keyboard: load(n_computer_k)},
   alarm: {front: load(a_computer_f), back: load(a_computer_b), side: load(a_computer_s), keyboard: load(a_computer_k)},
   warn: {front: load(w_computer_f), back: load(w_computer_b), side: load(w_computer_s), keyboard: load(w_computer_k)},
 };
-const host = {
+let host = {
   normal: {front: load(n_host_f), back: load(n_host_b), side: load(n_host_s), top: load(n_host_t)},
   alarm: {front: load(a_host_f), back: load(a_host_b), side: load(a_host_s), top: load(a_host_t)},
   warn: {front: load(w_host_f), back: load(w_host_b), side: load(w_host_s), top: load(w_host_t)},
 };
-const node = {
+let node = {
   normal: {front: load(n_node_f), back: load(n_node_b), side: load(n_node_s), top: load(n_node_t)},
   alarm: {front: load(a_node_f), back: load(a_node_b), side: load(a_node_s), top: load(a_node_t)},
   warn: {front: load(w_node_f), back: load(w_node_b), side: load(w_node_s), top: load(w_node_t)},
 };
-const laptop = {
+let laptop = {
   normal: {front: load(n_laptop_f), keyboard: load(n_laptop_k)},
   alarm: {front: load(a_laptop_f), keyboard: load(a_laptop_k)},
   warn: {front: load(w_laptop_f), keyboard: load(w_laptop_k)}
 };
-const signBg = load(txt_b);
-const arrowBg= load(arrow_t);
+let signBg = load(txt_b);
+let arrowBg = load(arrow_t);
 
 
-export {aio, computer, host, node, laptop, signBg,arrowBg};
+export {aio, computer, host, node, laptop, signBg, arrowBg};

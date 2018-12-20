@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 // import TWEEN from 'three-tween';
 import Model from '../Model';
-import utils from "../../utils/utils";
+import publicVal from "../../utils/publicVal";
 import Business from "../sub/business"
 import Honeynet from "../sub/honeynet"
 import Points from "../sub/Points"
 import socket from '../../utils/Socket'
-import pool from './Pool'
+// import pool from './Pool'
 
 class Stage extends Model {
 
@@ -26,7 +26,7 @@ class Stage extends Model {
 
     //以当前原点为基准，更新business下terminal保存的坐标数据
     let center = business.position;
-    Object.keys(utils.namespace).forEach((key) => {
+    Object.keys(publicVal.terminalName).forEach((key) => {
       let ter = this.getObjectByName(key);
       let ud = ter.userData;
       ud.points && ud.points.forEach((v, i, ary) => {
@@ -41,6 +41,9 @@ class Stage extends Model {
 
     });
 
+    this.business = business;
+    this.honeynet = honeynet;
+
     const pointArr = ['A101B101C102D101', 'A101B301C107', 'A101B101C101D101','A101B301','A101B201C101','A101B401C102'];
 
     setTimeout(() => {
@@ -51,9 +54,9 @@ class Stage extends Model {
         const {path,currentTarget} = this.points.createPath(from, to);
         if(path.length<2) return;
         this.points.parsePath(path,currentTarget);
-      }, 500);
+      },1000);
 
-    }, 8000)
+    }, 5000)
 
     this.connect();
   }
@@ -69,6 +72,9 @@ class Stage extends Model {
 
     this.rotateY(-this.aminateRad);//旋转地板
     this.points && this.points.animate()
+    this.business && this.business.animate();
+    this.honeynet && this.honeynet.animate();
+
   }
 
 

@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import publicVal from "./publicVal"
 
+let font=null;
 let utils = {
   makeShape: function () {
     let shape
@@ -58,53 +60,19 @@ let utils = {
     mesh.receiveShadow = true
 
     return mesh
-
   },
-  namespace:{
-    "A101":1,
-    "A101B101":1,
-    "A101B101C101D101":1,
-    "A101B101C101D102":1,
-    "A101B101C101D103":1,
-    "A101B101C101D104":1,
-    "A101B101C101D201":1,
-    "A101B101C101D202":1,
-    "A101B101C101D203":1,
-    "A101B101C102D101":1,
-    "A101B101C102D102":1,
-    "A101B101C102D103":1,
-    "A101B101C102D104":1,
-    "A101B101C102D201":1,
-    "A101B101C102D202":1,
-    "A101B101C102D203":1,
-    "A101B101C102D204":1,
-    "A101B101C102D301":1,
-    "A101B101C102D302":1,
-    "A101B101C102D303":1,
-    "A101B101C102D304":1,
-    "A101B201":1,
-    "A101B201C101":1,
-    "A101B201C102":1,
-    "A101B301":1,
-    "A101B301C101":1,
-    "A101B301C102":1,
-    "A101B301C103":1,
-    "A101B301C104":1,
-    "A101B301C105":1,
-    "A101B301C106":1,
-    "A101B301C107":1,
-    "A101B301C201":1,
-    "A101B301C202":1,
-    "A101B301C203":1,
-    "A101B301C204":1,
-    "A101B301C205":1,
-    "A101B301C206":1,
-    "A101B401":1,
-    "A101B401C101":1,
-    "A101B401C102":1,
-    // "A201":1
-  },
-  animateAry:[]
+  loadFont(){
+    return new Promise((resolve) => {
+      if(font){
+        resolve(font);
+      }else{
+        publicVal.loader.font.load(publicVal.YaHeiFontUrl, (_font)=>{
+          font=_font;
+          resolve(font);
+        });
+      }
+    });
+  }
 }
 
 export default utils

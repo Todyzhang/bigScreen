@@ -2,24 +2,17 @@ import * as THREE from 'three';
 import Model from '../Model';
 import {signBg} from '../../texture';
 import Terminal from "./Terminal";
-
-const fontUrl = './fonts/Microsoft YaHei_Bold.json';
+import utils from "../../utils/utils";
 
 
 class Area extends Model {
 
-  loadFont(){
-    return new Promise((resolve) => {
-      Model.loader.font.load(fontUrl, resolve);
-    });
-  }
-
-  /**
+    /**
    * 画有背景的招牌字
    * @param msg
    */
   createBgSign(msg,fontSize=5) {
-    this.loadFont().then((font)=>{
+    utils.loadFont().then((font)=>{
       this.createWords(font, msg,fontSize,signBg);
     });
 
@@ -32,7 +25,7 @@ class Area extends Model {
    */
   createSign(msg,fontSize=15){
     return new Promise((resolve) => {
-      this.loadFont()
+      utils.loadFont()
         .then((font) => {
           resolve(this.createWords(font,msg,fontSize));
         })
@@ -49,7 +42,7 @@ class Area extends Model {
       transparent: true,
       opacity: 1,
       side: THREE.DoubleSide,
-      depthTest:false
+      depthTest:false //防止字体闪烁
     });
     const shapes = font.generateShapes(msg, fontSize);
     const geo = new THREE.ShapeBufferGeometry(shapes);
@@ -76,6 +69,7 @@ class Area extends Model {
     let box = new THREE.Box3();
     box.expandByObject(text);
     text.position.x = -box.max.x / 2;
+    // text.position.z=0.01;
     plane.add(text)
     plane.position.y = 30;
     plane.position.x = 20;
@@ -121,7 +115,7 @@ class Area extends Model {
 
     line = new THREE.LineLoop(geometry, new THREE.LineBasicMaterial({color: 0x009ad8}));
     this.add(line);
-    // line.position.y=0.1
+    line.position.y=0.1
     // line.rotateZ(Math.PI/2)
     isCenter&&line.position.set(-x/2,0,z/2)
   }
@@ -185,7 +179,7 @@ class Area extends Model {
 
     });
     let line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({vertexColors: true}));
-
+    line.position.y=0.1;
     this.add(line);
 
     return line;
@@ -395,6 +389,10 @@ class Area extends Model {
     });
     isDebug&&console.log(this)
     return this.addAreaLine([pos1,...points,...pos2]);
+
+  }
+
+  animate() {
 
   }
 

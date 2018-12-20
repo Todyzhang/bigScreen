@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Model from '../Model';
 import {arrowBg} from '../../texture';
 const TWEEN = require('@tweenjs/tween.js');
+// const arrowTexture=new THREE.TextureLoader().load(arrowBg);
 
 class Points extends Model {
 
@@ -288,6 +289,14 @@ class Points extends Model {
 
   }
 
+  // createRouteObj2(){
+  //   const planeGeo=new THREE.PlaneGeometry(10,10);
+  //   const material=new THREE.MeshBasicMaterial({map: arrowTexture,transparent:true, side: THREE.DoubleSide});
+  //   const plane = new THREE.Mesh( planeGeo, material );
+  //   plane.rotation.x=Math.PI/2;
+  //   plane.position.y=0.01;
+  //   return plane;
+  // }
 
 }
 

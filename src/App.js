@@ -4,49 +4,29 @@ import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 import utils from './utils/utils';
 import Stage from './component/parent/Stage';
-import * as Stats from "three-stats"
-import InfoUI from "./component/parent/InfoUI";
-// const Stats =require('three-stats')
-window.THREE=THREE
-
-const coordinates = {
-  externalServiceDistr: {
-    cubes: [
-      [-60, 0, 140],
-      [-36, 0, 140],
-      [-12, 0, 140],
-      [12, 0, 140],
-      [36, 0, 140],
-      [60, 0, 140],
-    ],
-    cuboids: [
-      [-75, 0, 100],
-      [-50, 0, 100],
-      [-25, 0, 100],
-      [0, 0, 100],
-      [25, 0, 100],
-      [50, 0, 100],
-      [75, 0, 100],
-    ]
-  }
-}
+import crate from './textures/crate.gif';
 
 class App extends Component {
   state = {
     scene: null,
     camera: null,
     renderer: null,
-    stage:null,
-    stats:null,
+    stage: null,
     config: {
       background: 0x000000
-    }
+    },
+    infos: [{
+      time: '2018-10-30 11:25:02',
+      content: '***队伍被**区蜜罐捕获，***队伍从**区蜜罐逃逸，本次在蜜罐中耗时**分钟'
+    },],
+    infoStyles: null,
+    barWidth:100,
   }
 
   componentDidMount() {
 
-    const width = window.innerWidth
-    const height = window.innerHeight
+    const width = 1920;
+    const height = 1010;
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 5000)
@@ -55,7 +35,7 @@ class App extends Component {
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      canvas: document.getElementById('three-scene')
+      canvas: document.querySelector('canvas')
     });
     renderer.setSize(width, height)
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -76,34 +56,13 @@ class App extends Component {
     })
   }
 
-  render() {
-    return (
-      <div>
-        <div id="Stats-output"></div>
-        <canvas id="three-scene" />
-      </div>
-    );
-  }
-
   buildAuxSystem = () => {
-    const {scene, camera, renderer } = this.state;
+    const { camera, renderer } = this.state;
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.25
     controls.rotateSpeed = 0.35
-
-    var stats = new Stats.Stats();
-    this.setState({stats})
-    //设置统计模式
-    stats.setMode(0); // 0: fps, 1: ms
-    //统计信息显示在左上角
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-    //将统计对象添加到对应的<div>元素中
-    document.getElementById("Stats-output").appendChild(stats.domElement);
-
   }
 
   buildLightSystem = () => {
@@ -122,29 +81,107 @@ class App extends Component {
     const light = new THREE.AmbientLight(0xffffff, 0.3)
     scene.add(light)
   }
-  buildAxis(){
-    const { scene} = this.state;
+  buildAxis() {
+    const { scene } = this.state;
     scene.add(new THREE.AxesHelper(300))
   }
 
   loop = () => {
-    const { renderer, scene, camera,stage,stats } = this.state;
-    stats&&stats.update()
+    const { renderer, scene, camera, stage } = this.state;
     renderer.render(scene, camera)
-    stage&&stage.animate();
+    stage && stage.animate();
     requestAnimationFrame(this.loop)
   }
 
-  begin(){
-    const { scene} = this.state;
-    let stage=new Stage();
+  begin() {
+    const { scene } = this.state;
+    let stage = new Stage();
     this.setState({
-      stage:stage
-    });
+      stage: stage
+    })
     scene.add(stage);
   }
 
+  handleClick = () => {
+    this.setState(({ infos }) => {
+      let newInfos=infos.concat({
+        time: '1111',
+        content: '2222'
+      });
+      if(newInfos.length>4){
+        newInfos=newInfos.slice(-4);
+      }
+      return {
+        infos: newInfos,
+        infoStyles:{
+          transitionProperty:'none',
+          bottom:-58
+        }
+      }
+    },()=>{
+      setTimeout(() => {        
+        this.setState({infoStyles:{
+          transitionProperty:'all',
+          bottom:0,
+        }})
+      }, 0);
+    });
 
+    const barWidth=Math.floor(Math.random()*193);
+    this.setState({barWidth})
+  }
+
+  render() {
+    const { infos, infoStyles,barWidth } = this.state;
+    return (
+      <>
+        <div className="header">
+          <div id="title"></div>
+          <div id="countDown">
+            <span style={{ fontSize: 19, marginRight: 20 }}>比赛倒计时</span>
+            <span style={{ fontSize: 23, fontWeight: 'bold', letterSpacing: 3 }}>01:30:14</span>
+          </div>
+        </div>
+        <div id="main">
+          <div id="left" onClick={this.handleClick}>
+            <div className="ranks">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) =>
+                (
+                  <div className="rank">
+                    <div className="num">{item}</div>
+                    <div className="avatar">
+                      <img src={crate} alt="" width="42" height="42" style={{ borderRadius: 3 }} />
+                    </div>
+                    <div className="rank-middle">
+                      <div className="team-name">Team WE</div>
+                      <div className="percentage">
+                        <div className="percentage-bar">
+                          <div className="percentage-bar-mask" style={{width:barWidth}}></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rank-right">50%</div>
+                  </div>
+                )
+              )}
+
+            </div>
+          </div>
+          <canvas id="displayBoard" />
+          <div id="scrollInfo">
+            <div className="info-items" style={infoStyles}>
+              {infos.map(item => (
+                <div className="info-item">
+                  <div className="info-time">{item.time}</div>
+                  <div className="info-content">{item.content}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 }
 
 

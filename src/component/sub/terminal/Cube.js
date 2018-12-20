@@ -16,25 +16,29 @@ class Cube extends Terminal{
       }),
       top=new THREE.MeshPhongMaterial({
         map:host.normal.top
-      });
+      }),
+      line = new THREE.LineBasicMaterial({ color: 0x009ad8 });
 
-    this.materials={side,back,top};
+    this.materials={side,back,top,line};
 
   }
   setNoramlMaterial(){
     this.materials.side.map=host.normal.side;
     this.materials.back.map=host.normal.back;
     this.materials.top.map=host.normal.top;
+    this.materials.line.color=new THREE.Color(0x009ad8);
   }
   setAlarmMaterial(){
     this.materials.side.map=host.alarm.side;
     this.materials.back.map=host.alarm.back;
     this.materials.top.map=host.alarm.top;
+    this.materials.line.color=new THREE.Color(0xffa95c)
   }
   setWarnMaterial(){
     this.materials.side.map=host.warn.side;
     this.materials.back.map=host.warn.back;
     this.materials.top.map=host.warn.top;
+    this.materials.line.color=new THREE.Color(0xff3332)
   }
   /**
    * 创建主体
@@ -51,8 +55,8 @@ class Cube extends Terminal{
     square.vertices.push(new THREE.Vector3(-halfSize, halfSize, halfSize));
     square.vertices.push(new THREE.Vector3(-halfSize, halfSize, -halfSize));
     square.vertices.push(new THREE.Vector3(halfSize, halfSize, -halfSize));
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x009ad8 });
-    const lineSquare = new THREE.Line(square, lineMaterial);
+    // const lineMaterial = new THREE.LineBasicMaterial({ color: 0x009ad8 });
+    const lineSquare = new THREE.Line(square, mtrs.line);
     box.add(lineSquare);
     let box_s=box.clone();
     box.position.y=5;

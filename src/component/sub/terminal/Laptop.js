@@ -16,12 +16,12 @@ class Laptop extends Terminal{
     side=new THREE.MeshPhongMaterial({
       map:host.normal.side
     }),
-      keyboard=new THREE.MeshBasicMaterial({
+      keyboard=new THREE.MeshPhongMaterial({
         map:laptop.normal.keyboard
       });
 
     this.materials={side,front,keyboard};
-    this.createKeyboard(keyboard);
+    this.createKeyboard();
   }
   setNoramlMaterial(){
     this.materials.side.map=laptop.normal.side;
@@ -30,7 +30,7 @@ class Laptop extends Terminal{
   }
   setAlarmMaterial(){
     this.materials.side.map=host.alarm.side;
-    this.materials.front.map=laptop.alarm.side;
+    this.materials.front.map=laptop.alarm.front;
     this.materials.keyboard.map=laptop.alarm.keyboard;
   }
   setWarnMaterial(){
@@ -51,8 +51,8 @@ class Laptop extends Terminal{
     this.add(screen);
   }
 
-  createKeyboard(material){
-    let keyboard = new THREE.Mesh(new THREE.BoxGeometry(18, 1, 10), material);
+  createKeyboard(){
+    let keyboard = new THREE.Mesh(new THREE.BoxGeometry(18, 1, 10), this.materials.keyboard);
 
     this.add(keyboard)
   }

@@ -12,7 +12,7 @@ class Terminal extends THREE.Object3D{
   init(){
     this.createMaterial();
     this.createMainCube();
-    this.animate();
+
   }
 
   createMaterial(){}

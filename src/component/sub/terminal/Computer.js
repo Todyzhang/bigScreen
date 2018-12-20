@@ -18,7 +18,7 @@ class Computer extends Terminal {
       side = new THREE.MeshPhongMaterial({
         map: host.normal.side
       }),
-      keyboard = new THREE.MeshBasicMaterial({
+      keyboard = new THREE.MeshPhongMaterial({
         map: computer.normal.keyboard
       });
 
@@ -32,7 +32,7 @@ class Computer extends Terminal {
   }
   setAlarmMaterial(){
     this.materials.side.map=host.alarm.side;
-    this.materials.front.map=computer.alarm.side;
+    this.materials.front.map=computer.alarm.front;
     this.materials.back.map=computer.alarm.back;
     this.materials.keyboard.map=computer.alarm.keyboard;
   }

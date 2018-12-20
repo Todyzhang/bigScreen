@@ -29,7 +29,7 @@ class Socket {
 
   onOpen(evt){
     console.log('websocket connect')
-    // this.ws.send('game1')
+    this.ws.send('ranking')
   }
 
   onError(evt){
