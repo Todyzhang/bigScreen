@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import publicVal from "./publicVal"
 
 let font=null;
+let box3=new THREE.Box3();
 let utils = {
   makeShape: function () {
     let shape
@@ -66,13 +67,72 @@ let utils = {
       if(font){
         resolve(font);
       }else{
-        publicVal.loader.font.load(publicVal.YaHeiFontUrl, (_font)=>{
+        publicVal.loader.font.load(publicVal.fontUrl, (_font)=>{
           font=_font;
           resolve(font);
         });
       }
     });
+  },
+  //得到外框大小
+  getBorder(mesh){
+    let size=new THREE.Vector3();
+    box3.makeEmpty();//清空数据
+    box3.expandByObject(mesh);
+    box3.getSize(size);
+    return size;
+  },
+  canvas:{
+    terminalFlagBg() {
+      let canvas = document.createElement('canvas');
+      canvas.width = 75;
+      canvas.height = 20;
+      let ctx = canvas.getContext("2d");
+      let grd = ctx.createLinearGradient(0, 0, 0, 20);
+      grd.addColorStop(0, 'transparent');
+      // grd.addColorStop(0.25, '#1b2023');
+      grd.addColorStop(0.5, '#ffa95c');
+      // grd.addColorStop(0.75, '#1b2023');
+      grd.addColorStop(1, 'transparent');
+      // document.body.appendChild(canvas)
+      return canvas;
+    },
+
+    terminalRipplesBg() {
+      let canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 100;
+      let ctx = canvas.getContext("2d");
+      let grd = ctx.createRadialGradient(50, 50, 20, 50, 50, 50);
+      grd.addColorStop(0, 'transparent');
+      grd.addColorStop(1, '#ffa95c');
+
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 100, 100);
+
+      return canvas;
+    }
+  },
+
+  getRandomColor16(){//十六进制颜色随机
+    var r = Math.floor(Math.random()*256);
+    var g = Math.floor(Math.random()*256);
+    var b = Math.floor(Math.random()*256);
+    var color = `rgb(${r},${g},${b})`;
+    return color;
+  },
+  parseSecToHMS(seconds){
+    let h=Math.floor(seconds/3600);
+    let ms=seconds-h*3600;
+    let m=Math.floor(ms/60);
+    let s=ms-m*60;
+    // return `${(h+'').padStart(2, '0')}:${(m+'').padStart(2, '0')}:${(s+'').padStart(2, '0')}`;
+    return `${utils.padZeroStart(h)}:${utils.padZeroStart(m)}:${utils.padZeroStart(s)}`;
+  },
+  padZeroStart(number){
+    return (number+'').padStart(2, '0')
   }
+
 }
 
 export default utils

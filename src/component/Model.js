@@ -12,16 +12,13 @@ class Model extends THREE.Group{
   init(){}
 
   debugPoint(vector3){
-    let geo=new THREE.BoxGeometry(3,30,3);
+    let geo=new THREE.BoxGeometry(3,40,3);
     let mar=new THREE.MeshBasicMaterial({color:0xff0000});
     let box=new THREE.Mesh(geo,mar);
     this.add(box);
     console.log(vector3)
 
-    // box.position.set({x:vector3.x,y:vector3.y,z:vector3.z})
-    box.position.x=vector3.x;
-    box.position.y=vector3.y;
-    box.position.z=vector3.z;
+    box.position.set(vector3.x,vector3.y+20,vector3.z)
   }
   debugPoints(points){
     points.forEach((v)=>{
@@ -42,8 +39,5 @@ class Model extends THREE.Group{
     return line;
   }
 }
-Model.loader={
-  texture:new THREE.TextureLoader(),
-  font:new THREE.FontLoader()
-};
+
 export default Model

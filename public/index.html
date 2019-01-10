@@ -19,7 +19,11 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>ISW企业内网安全攻防对抗战</title>
+    <script>
+      var WSSERVER = location.protocol.replace('http', 'ws') + '//' + location.host + '/api/bscreen/tq/train/info';
+      var IMGHOST = location.protocol.replace('https','http') + '//' + location.hostname +":" + (location.port||'48489');
+    </script>
   </head>
   <body>
     <noscript>
